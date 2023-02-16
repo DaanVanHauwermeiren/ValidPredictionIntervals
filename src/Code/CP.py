@@ -2,8 +2,9 @@ import math
 import warnings
 
 import numpy as np
+import torch
 
-from src.Code.QualityMeasures import *
+from src.Code.QualityMeasures import MPIW, coverage
 
 __all__ = [
     "empirical_percentile",
