@@ -1,0 +1,10 @@
+# for running kernels in vscode
+ipykernel
+numpy
+# not sure if this is platform independent
+openpyxl
+pandas
+torch
+scikit-learn
+scipy
+tqdm
