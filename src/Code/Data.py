@@ -1,17 +1,27 @@
 from os import path
 
-from src.Code.CP import *
-
-import numpy as np
-
 from sklearn.metrics import r2_score
 from torch.nn import MSELoss
 
-class DataObject:
+from src.Code.CP import DISTscore
 
-    def __init__(self, dataset, method, seed, alpha = 0.1, test_frac = 0.05, \
-    minimal_cov = 0.6, perf_func = r2_score, taxonomy_func = None, \
-    disconformity_measure = DISTscore, verbosity = 0, cp_mode = True, extra = None):
+
+class DataObject:
+    def __init__(
+        self,
+        dataset,
+        method,
+        seed,
+        alpha=0.1,
+        test_frac=0.05,
+        minimal_cov=0.6,
+        perf_func=r2_score,
+        taxonomy_func=None,
+        disconformity_measure=DISTscore,
+        verbosity=0,
+        cp_mode=True,
+        extra=None,
+    ):
 
         self.__alpha = alpha
         self.__cp_mode = cp_mode
@@ -39,14 +49,14 @@ class DataObject:
             self.__conditional_cov = dict()
             self.__conditional_width = dict()
             self.__conditional_perf = dict()
-            for i in range(1, self.__taxonomy_func.split_count()+1):
+            for i in range(1, self.__taxonomy_func.split_count() + 1):
                 self.__conditional_cov[i] = -999
                 self.__conditional_width[i] = -999
                 self.__conditional_perf[i] = -999
             self.__conditional_cp_cov = dict()
             self.__conditional_cp_width = dict()
             self.__conditional_cp_perf = dict()
-            for i in range(1, self.__taxonomy_func.split_count()+1):
+            for i in range(1, self.__taxonomy_func.split_count() + 1):
                 self.__conditional_cp_cov[i] = -999
                 self.__conditional_cp_width[i] = -999
                 self.__conditional_cp_perf[i] = -999
@@ -132,69 +142,174 @@ class DataObject:
     def verbosity(self):
         return self.__verbosity
 
-    def generateFile(self, CP = False):
+    def generateFile(self, CP=False):
 
         if CP:
             result = str(self.__cp_cov) + "\t" + str(self.__cp_width) + "\t" + str(self.__cp_perf) + "\n"
             conditional_result = ""
             if self.__taxonomy_func:
                 for i in range(self.__taxonomy_func.split_count()):
-                    conditional_result += str(self.__conditional_cp_cov[i+1]) + "\t" + str(self.__conditional_cp_width[i+1]) + "\t" + str(self.__conditional_cp_perf[i+1]) + "\n"
+                    conditional_result += (
+                        str(self.__conditional_cp_cov[i + 1])
+                        + "\t"
+                        + str(self.__conditional_cp_width[i + 1])
+                        + "\t"
+                        + str(self.__conditional_cp_perf[i + 1])
+                        + "\n"
+                    )
         else:
             result = str(self.__cov) + "\t" + str(self.__width) + "\t" + str(self.__perf) + "\n"
             conditional_result = ""
             if self.__taxonomy_func:
                 for i in range(self.__taxonomy_func.split_count()):
-                    conditional_result += str(self.__conditional_cov[i+1]) + "\t" + str(self.__conditional_width[i+1]) + "\t" + str(self.__conditional_perf[i+1]) + "\n"
+                    conditional_result += (
+                        str(self.__conditional_cov[i + 1])
+                        + "\t"
+                        + str(self.__conditional_width[i + 1])
+                        + "\t"
+                        + str(self.__conditional_perf[i + 1])
+                        + "\n"
+                    )
 
         return result, conditional_result
 
-    def export(self, folder, with_config = True, skip = True, extra = None):
+    def export(self, folder, with_config=True, skip=True, extra=None):
 
         result, conditional_result = self.generateFile()
-        cp_result, conditional_cp_result = self.generateFile(CP = True)
+        cp_result, conditional_cp_result = self.generateFile(CP=True)
 
         if self.__cov != -999 and self.__width != -999 and self.__perf != -999:
-            with open(path.join(folder, self.__dataset, "results", self.__method + ("-FULL" if not self.__cp_mode else "") + "-results-seed" + str(self.__seed) + ".txt"), "w") as file:
+            with open(
+                path.join(
+                    folder,
+                    self.__dataset,
+                    "results",
+                    self.__method
+                    + ("-FULL" if not self.__cp_mode else "")
+                    + "-results-seed"
+                    + str(self.__seed)
+                    + ".txt",
+                ),
+                "w",
+            ) as file:
                 file.write(result)
 
         if self.__cp_cov != -999 and self.__cp_width != -999 and self.__cp_perf != -999:
-            with open(path.join(folder, self.__dataset, "results", self.__method + "-CP-results-seed" + str(self.__seed) + ".txt"), "w") as file:
+            with open(
+                path.join(
+                    folder,
+                    self.__dataset,
+                    "results",
+                    self.__method + "-CP-results-seed" + str(self.__seed) + ".txt",
+                ),
+                "w",
+            ) as file:
                 file.write(cp_result)
 
         if self.__taxonomy_func:
             if self.__cov != -999 and self.__width != -999 and self.__perf != -999:
-                with open(path.join(folder, self.__dataset, "results", self.__method + ("-FULL" if not self.__cp_mode else "") + "-conditional-results-seed" + str(self.__seed) + ".txt"), "w") as file:
+                with open(
+                    path.join(
+                        folder,
+                        self.__dataset,
+                        "results",
+                        self.__method
+                        + ("-FULL" if not self.__cp_mode else "")
+                        + "-conditional-results-seed"
+                        + str(self.__seed)
+                        + ".txt",
+                    ),
+                    "w",
+                ) as file:
                     file.write(conditional_result)
             if self.__cp_cov != -999 and self.__cp_width != -999 and self.__cp_perf != -999:
-                with open(path.join(folder, self.__dataset, "results", self.__method + "-CP-conditional-results-seed" + str(self.__seed) + ".txt"), "w") as file:
+                with open(
+                    path.join(
+                        folder,
+                        self.__dataset,
+                        "results",
+                        self.__method + "-CP-conditional-results-seed" + str(self.__seed) + ".txt",
+                    ),
+                    "w",
+                ) as file:
                     file.write(conditional_cp_result)
 
         if with_config:
             with open(path.join(folder, self.__dataset, "results", self.__method + "-config.txt"), "w") as file:
-            # with open(folder + self.__dataset + "-" + self.__method + "-config-seed" + str(self.__seed) + ".txt", "w") as file:
+                # with open(folder + self.__dataset + "-" + self.__method + "-config-seed" + str(self.__seed) + ".txt", "w") as file:
                 file.write(self.dump())
                 for k in self.__extra.keys():
                     file.write(str(k) + ":\t" + str(self.__extra[k]) + "\n")
 
     def dump(self):
-        return "alpha:\t"+str(self.__alpha)+"\n" + \
-        "dataset:\t"+self.__dataset+"\n" + \
-        "seed:\t"+str(self.__seed)+"\n" + \
-        "method:\t"+self.__method+"\n" + \
-        "test_frac:\t"+str(self.__test_frac)+"\n" + \
-        "performance_measure:\t"+str(self.perf_func)+"\n" + \
-        "disconformity_measure:\t"+str(self.score)+"\n" + \
-        "taxonomy_func:\t"+str(self.__taxonomy_func)+"\n" + \
-        "verbosity:\t"+str(self.__verbosity)+"\n"
+        return (
+            "alpha:\t"
+            + str(self.__alpha)
+            + "\n"
+            + "dataset:\t"
+            + self.__dataset
+            + "\n"
+            + "seed:\t"
+            + str(self.__seed)
+            + "\n"
+            + "method:\t"
+            + self.__method
+            + "\n"
+            + "test_frac:\t"
+            + str(self.__test_frac)
+            + "\n"
+            + "performance_measure:\t"
+            + str(self.perf_func)
+            + "\n"
+            + "disconformity_measure:\t"
+            + str(self.score)
+            + "\n"
+            + "taxonomy_func:\t"
+            + str(self.__taxonomy_func)
+            + "\n"
+            + "verbosity:\t"
+            + str(self.__verbosity)
+            + "\n"
+        )
+
 
 class NNDataObject(DataObject):
+    def __init__(
+        self,
+        dataset,
+        method,
+        seed,
+        alpha=0.1,
+        batch=64,
+        dim=64,
+        val_length=1,
+        drop=0.1,
+        l=1e-6,
+        epochs=100,
+        learning_rate=5e-4,
+        num=1,
+        test_frac=0.05,
+        loss_func=MSELoss(),
+        perf_func=r2_score,
+        taxonomy_func=None,
+        verbosity=0,
+        cp_mode=True,
+        extra=None,
+    ):
 
-    def __init__(self, dataset, method, seed, alpha = 0.1, batch = 64, dim = 64, \
-    val_length = 1, drop = 0.1, l = 1e-6, epochs = 100, learning_rate = 5e-4, num = 1, \
-    test_frac = 0.05, loss_func = MSELoss(), perf_func = r2_score, taxonomy_func = None, verbosity = 0, cp_mode = True, extra = None):
-
-        super().__init__(dataset, method, seed, alpha, test_frac, perf_func = perf_func, taxonomy_func = taxonomy_func, disconformity_measure = DISTscore, verbosity = verbosity, cp_mode = cp_mode, extra = extra)
+        super().__init__(
+            dataset,
+            method,
+            seed,
+            alpha,
+            test_frac,
+            perf_func=perf_func,
+            taxonomy_func=taxonomy_func,
+            disconformity_measure=DISTscore,
+            verbosity=verbosity,
+            cp_mode=cp_mode,
+            extra=extra,
+        )
         self.__batch = batch
         self.__dim = dim
         self.__drop = drop
@@ -217,7 +332,7 @@ class NNDataObject(DataObject):
     def epochs(self):
         return self.__epochs
 
-    def l(self):
+    def l(self):  # noqa: E743
         return self.__l
 
     def learning_rate(self):
@@ -230,28 +345,71 @@ class NNDataObject(DataObject):
         return self.__val_length
 
     def dump(self):
-        return super().dump() + \
-        "batch:\t" + str(self.__batch) + "\n" + \
-        "dim:\t" + str(self.__dim) + "\n" + \
-        "drop:\t" + str(self.__drop) + "\n" + \
-        "epochs:\t" + str(self.__epochs) + "\n" + \
-        "l2:\t" + str(self.__l) + "\n" + \
-        "learning_rate:\t" + str(self.__learning_rate) + "\n" + \
-        "val_length:\t" + str(self.__val_length) + "\n" + \
-        "ensemble_size:\t" + str(self.__num) + "\n" + \
-        "loss_func:\t" + str(self.loss_func) + "\n"
+        return (
+            super().dump()
+            + "batch:\t"
+            + str(self.__batch)
+            + "\n"
+            + "dim:\t"
+            + str(self.__dim)
+            + "\n"
+            + "drop:\t"
+            + str(self.__drop)
+            + "\n"
+            + "epochs:\t"
+            + str(self.__epochs)
+            + "\n"
+            + "l2:\t"
+            + str(self.__l)
+            + "\n"
+            + "learning_rate:\t"
+            + str(self.__learning_rate)
+            + "\n"
+            + "val_length:\t"
+            + str(self.__val_length)
+            + "\n"
+            + "ensemble_size:\t"
+            + str(self.__num)
+            + "\n"
+            + "loss_func:\t"
+            + str(self.loss_func)
+            + "\n"
+        )
+
 
 class ForestDataObject(DataObject):
+    def __init__(
+        self,
+        dataset,
+        method,
+        seed,
+        alpha=0.1,
+        test_frac=0.05,
+        trees=100,
+        perf_func=r2_score,
+        taxonomy_func=None,
+        verbosity=0,
+        cp_mode=True,
+        extra=None,
+    ):
 
-    def __init__(self, dataset, method, seed, alpha = 0.1, test_frac = 0.05, \
-    trees = 100, perf_func = r2_score, taxonomy_func = None, verbosity = 0, cp_mode = True, extra = None):
-
-        super().__init__(dataset, method, seed, alpha, test_frac, perf_func = perf_func, taxonomy_func = taxonomy_func, disconformity_measure = DISTscore, verbosity = verbosity, cp_mode = cp_mode, extra = None)
+        super().__init__(
+            dataset,
+            method,
+            seed,
+            alpha,
+            test_frac,
+            perf_func=perf_func,
+            taxonomy_func=taxonomy_func,
+            disconformity_measure=DISTscore,
+            verbosity=verbosity,
+            cp_mode=cp_mode,
+            extra=None,
+        )
         self.__trees = trees
 
     def trees(self):
         return self.__trees
 
     def dump(self):
-        return super().dump() + \
-        "trees:\t" + str(self.__trees) + "\n"
+        return super().dump() + "trees:\t" + str(self.__trees) + "\n"
