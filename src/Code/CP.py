@@ -1,4 +1,4 @@
-from Code.QualityMeasures import *
+from src.Code.QualityMeasures import *
 
 from scipy.optimize import root_scalar
 

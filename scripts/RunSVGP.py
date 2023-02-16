@@ -2,10 +2,10 @@ import sys
 import numpy as np
 import scipy.stats as st
 
-from Code.QualityMeasures import *
-from Code.Load import *
-from Code.CP import *
-from Code.Data import *
+from src.Code.QualityMeasures import *
+from src.Code.Load import *
+from src.Code.CP import *
+from src.Code.Data import *
 
 import torch
 import gpytorch as gp

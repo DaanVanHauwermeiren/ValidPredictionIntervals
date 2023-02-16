@@ -2,12 +2,13 @@ import sys, math, copy
 import numpy as np
 import scipy.stats as st
 
-from Code.QualityMeasures import *
-from Code.Load import *
-from Code.CP import *
-from Code.Data import *
-from Code.Utils import L2Loss, apply_dropout
+from src.Code.QualityMeasures import *
+from src.Code.Load import *
+from src.Code.CP import *
+from src.Code.Data import *
+from src.Code.Utils import GaussianLoss, ThresholdAct, apply_dropout
 
+from sklearn.metrics import r2_score
 import torch
 import torch.nn as nn
 
@@ -15,17 +16,17 @@ def ensemble(model, x, num):
     out = np.zeros((x.shape[0], 2))
     for i in range(num):
         preds = model(x).numpy()
-        out[:, 0] += preds
-        out[:, 1] += np.square(preds)
+        out[:, 0] += preds[:, 0]
+        out[:, 1] += np.exp(preds[:, 1]) + np.square(preds[:, 0])
     out = out / num
 
     out[:, 1] = np.maximum(0, out[:, 1] - np.square(out[:, 0])) # zero-clipping to avoid NaN results in square root
     return out
 
-def DropoutEnsemble(container):
+def KG(container):
 
     if container.verbosity() > 0:
-        print("Performing Dropout on", container.dataset(), "for seed", container.seed(), "with dropout optimization")
+        print("Performing KG on", container.dataset(), "for seed", container.seed(), "with dropout optimization")
         print()
 
     data = init(container.dataset(), container.seed(), cp_mode = container.cp_mode())
@@ -37,16 +38,16 @@ def DropoutEnsemble(container):
     y_val = torch.from_numpy(y_val).float().requires_grad_(False)
 
     best_model = None
+    best_loss = 1e8
+    train_losses = np.full(container.val_length(), 1e10)
     best_epoch = container.epochs()
     best_cnt = np.Inf
     cnt = 0
 
-    best_loss = 1e8
-    train_losses = np.full(container.val_length(), 1e10)
+    act_threshold = calculateThreshold(data["y_train"]) if container["use_threshold"] else calculateThreshold()
 
     for drop in container.drop():
 
-        drop = round(drop, 2)
         l = (1 - drop) / 2 if container["reg"] else 0
 
         model = nn.Sequential(
@@ -56,8 +57,8 @@ def DropoutEnsemble(container):
             nn.Linear(container.dim(), container.dim()),
             nn.ReLU(),
             nn.Dropout(drop),
-            nn.Linear(container.dim(), 1),
-            nn.Flatten(0, 1)
+            nn.Linear(container.dim(), 2),
+            ThresholdAct(act_threshold)
         )
 
         for m in model:
@@ -68,6 +69,7 @@ def DropoutEnsemble(container):
         m = copy.deepcopy(model)
 
         optimizer = torch.optim.Adam(model.parameters(), lr = container.learning_rate(), weight_decay = 0)
+
         for e in range(container.epochs()):
 
             model.train()
@@ -94,6 +96,7 @@ def DropoutEnsemble(container):
             model.apply(apply_dropout)
             with torch.no_grad():
                 loss = container.loss_func(model, X_val, y_val, l).numpy()
+
                 train_losses[1:] = train_losses[:-1]
                 train_losses[0] = loss
 
@@ -129,7 +132,7 @@ def DropoutEnsemble(container):
 
             if cnt > best_cnt:
                 break
-            cnt = cnt + 1
+            cnt += 1
 
             optimizer.zero_grad()
 
@@ -163,12 +166,13 @@ def DropoutEnsemble(container):
 
         return container
 
-def run(data, seed, mode = True, conditional = None, conditional_params = None, \
-    reg = False, **params):
 
-    extra = {"reg": reg}
+def run(data, seed, mode = True, conditional = None, conditional_params = None, \
+    use_threshold = True, reg = False, **params):
+
+    extra = {"use_threshold": use_threshold, "reg": reg}
 
     tax = taxonomyFactory(conditional, conditional_params)
-    container = NNDataObject(data, "Dropout", seed = seed, taxonomy_func = tax, loss_func = L2Loss, cp_mode = mode, extra = extra, **params)
-    container = DropoutEnsemble(container)
+    container = NNDataObject(data, "KG", seed = seed, taxonomy_func = tax, loss_func = GaussianLoss, cp_mode = mode, extra = extra, **params)
+    container = KG(container)
     container.export(FOLDER)

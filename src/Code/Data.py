@@ -1,4 +1,6 @@
-from Code.CP import *
+from os import path
+
+from src.Code.CP import *
 
 import numpy as np
 
@@ -153,23 +155,23 @@ class DataObject:
         cp_result, conditional_cp_result = self.generateFile(CP = True)
 
         if self.__cov != -999 and self.__width != -999 and self.__perf != -999:
-            with open(folder + self.__dataset + "/results/" + self.__method + ("-FULL" if not self.__cp_mode else "") + "-results-seed" + str(self.__seed) + ".txt", "w") as file:
+            with open(path.join(folder, self.__dataset, "results", self.__method + ("-FULL" if not self.__cp_mode else "") + "-results-seed" + str(self.__seed) + ".txt"), "w") as file:
                 file.write(result)
 
         if self.__cp_cov != -999 and self.__cp_width != -999 and self.__cp_perf != -999:
-            with open(folder + self.__dataset + "/results/" + self.__method + "-CP-results-seed" + str(self.__seed) + ".txt", "w") as file:
+            with open(path.join(folder, self.__dataset, "results", self.__method + "-CP-results-seed" + str(self.__seed) + ".txt"), "w") as file:
                 file.write(cp_result)
 
         if self.__taxonomy_func:
             if self.__cov != -999 and self.__width != -999 and self.__perf != -999:
-                with open(folder + self.__dataset + "/results/" + self.__method + ("-FULL" if not self.__cp_mode else "") + "-conditional-results-seed" + str(self.__seed) + ".txt", "w") as file:
+                with open(path.join(folder, self.__dataset, "results", self.__method + ("-FULL" if not self.__cp_mode else "") + "-conditional-results-seed" + str(self.__seed) + ".txt"), "w") as file:
                     file.write(conditional_result)
             if self.__cp_cov != -999 and self.__cp_width != -999 and self.__cp_perf != -999:
-                with open(folder + self.__dataset + "/results/" + self.__method + "-CP-conditional-results-seed" + str(self.__seed) + ".txt", "w") as file:
+                with open(path.join(folder, self.__dataset, "results", self.__method + "-CP-conditional-results-seed" + str(self.__seed) + ".txt"), "w") as file:
                     file.write(conditional_cp_result)
 
         if with_config:
-            with open(folder + self.__dataset + "/results/" + self.__method + "-config.txt", "w") as file:
+            with open(path.join(folder, self.__dataset, "results", self.__method + "-config.txt"), "w") as file:
             # with open(folder + self.__dataset + "-" + self.__method + "-config-seed" + str(self.__seed) + ".txt", "w") as file:
                 file.write(self.dump())
                 for k in self.__extra.keys():

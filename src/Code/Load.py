@@ -2,16 +2,19 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.io import arff
+from os import path
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+from src.paths import DATA_DIR
 
 SEEDS = [13, 2, 47, 1, 15, 31, 89, 666, 3, 43, 5197, 558213, 4236, 410, 74888, 1563, 1794, 711489, 156874, 123, \
     744741,442262,53750,550509,751836,73427,316551,321489,264450,691340 \
     ,256212,248195,322953,469088,515349,717046,904096,600809,566875,335409 \
     ,128274,11299,40740,135231,78276,268373,148066,569507,212406,584182]
 
-FOLDER = "./Data/"
+FOLDER = DATA_DIR
 
 def calculateThreshold(data = None):
     if data is not None:
@@ -54,29 +57,29 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
     folder = FOLDER
 
     if choice == "naval":
-        frame = pd.read_csv(folder+"naval/data.txt")
+        frame = pd.read_csv(path.join(folder, "naval", "data.txt"))
 
         y = frame["GT Compressor decay state coefficient"].to_numpy()
         X = pd.concat([frame.iloc[:, :8], frame.iloc[:, 9:11], frame.iloc[:, 12:-2]], axis = 1).to_numpy()
 
     elif choice == "turbine":
 
-        frame = pd.read_excel(folder+"turbine/Folds5x2_pp.xlsx")
+        frame = pd.read_excel(path.join(folder, "turbine", "Folds5x2_pp.xlsx"))
 
         y = frame["PE"].to_numpy()
         X = frame.iloc[:, :4].to_numpy()
 
     elif choice == "concrete":
 
-        frame = pd.read_excel(folder+"concrete/Concrete_Data.xls")
+        frame = pd.read_excel(path.join(folder, "concrete", "Concrete_Data.xls"))
 
         y = frame.iloc[:, -1].to_numpy()
         X = frame.iloc[:, :-1].to_numpy()
 
     elif choice == "puma32H":
 
-        frame_train = pd.read_csv(folder+"puma32H/puma32H.data", header = None)
-        frame_test = pd.read_csv(folder+"puma32H/puma32H.test", header = None)
+        frame_train = pd.read_csv(path.join(folder, "puma32H", "puma32H.data"), header = None)
+        frame_test = pd.read_csv(path.join(folder, "puma32H", "puma32H.test"), header = None)
         frame = pd.concat([frame_train, frame_test])
 
         y = frame.iloc[:, -1].to_numpy()
@@ -84,7 +87,7 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
 
     elif choice == "crime2":
 
-        frame = pd.read_csv(folder+"crime2/communities.data", na_values = '?', header = None)
+        frame = pd.read_csv(path.join(folder, "crime2", "communities.data"), na_values = '?', header = None)
         frame = frame.iloc[:, 5:]
 
         if verbose:
@@ -102,7 +105,7 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
 
     elif choice == "blog":
 
-        frame = pd.read_csv(folder + "blog/blogData_train.csv", na_values = '?', header = None)
+        frame = pd.read_csv(path.join(folder, "blog", "blogData_train.csv"), na_values = '?', header = None)
         removables = frame.columns[frame.isnull().any()].tolist()
         if verbose:
             print("Raw input:", frame.shape)
@@ -116,7 +119,7 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
 
     elif choice == "fb1":
 
-        frame_train = pd.read_csv(folder + "fb1/Features_Variant_1.csv", na_values = '?', header = None)
+        frame_train = pd.read_csv(path.join(folder, "fb1", "Features_Variant_1.csv"), na_values = '?', header = None)
         removables = frame_train.columns[frame_train.isnull().any()].tolist()
         if verbose:
             print("Raw input:", frame_train.shape)
@@ -130,7 +133,7 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
 
     elif choice == "residential":
 
-        frame = pd.read_excel(folder + "residential/Residential-Building-Data-Set.xlsx", header = 1)
+        frame = pd.read_excel(path.join(folder, "residential", "Residential-Building-Data-Set.xlsx"), header = 1)
         frame = frame.drop(columns = frame.columns[:5]) # First 5 columns contain temporal and regional information
         X = frame.iloc[:, :-2].to_numpy()
 #         y = frame.iloc[:, -2].to_numpy() # price
@@ -138,7 +141,7 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
 
     elif choice == "traffic":
 
-        file = arff.loadarff(folder + "traffic/data.arff")
+        file = arff.loadarff(path.join(folder, "traffic", "data.arff"))
         frame = pd.DataFrame(file[0])
         frame["Hour"] = frame["Hour"].astype(np.str)
         time = frame["Hour"].to_numpy()
@@ -149,7 +152,7 @@ def init(choice, seed = 2, test_frac = 0.2, val_frac = 0.5, verbose = False, sca
 
     elif choice == "star":
 
-        df = pd.read_csv(folder + "star/STAR.csv")
+        df = pd.read_csv(path.join(folder, "star", "STAR.csv"))
         df.loc[df['gender'] == 'female', 'gender'] = 0
         df.loc[df['gender'] == 'male', 'gender'] = 1
 
