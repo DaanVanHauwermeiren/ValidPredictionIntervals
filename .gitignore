@@ -83,7 +83,7 @@ target/
 .ipynb_checkpoints
 
 #data folder
-./src/Data/*/results/*
+src/Data/*/results/*
 !Data/*/results/.gitkeep
 
 #models
