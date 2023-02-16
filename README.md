@@ -6,4 +6,5 @@ In the future, further support for conditional conformal prediction might be add
 ## installation
 
 run `create_venv.sh`
-This will create a virtual environment in `./venv/` and will install the package in `./src/` with the necessary libraries defined in `requirements.txt`
+This will create a virtual environment in `./venv/` and will install the package in `./src/` with the necessary libraries defined in `requirements.txt`.
+Now the files in `./scripts` can be used.
