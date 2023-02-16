@@ -8,5 +8,10 @@ source .venv/bin/activate
 .venv/bin/pip install --upgrade pip setuptools wheel
 # install package
 .venv/bin/pip install -e .
-# add requirements
-.venv/bin/pip install -r requirements.txt
+# add additional requirements for development
+.venv/bin/pip install --upgrade -r requirements-dev.txt
+
+# setup pre-commit
+pre-commit uninstall
+pre-commit install
+pre-commit install --install-hooks
