@@ -2,11 +2,11 @@ import sys, math, copy
 import numpy as np
 import scipy.stats as st
 
-from Code.QualityMeasures import *
-from Code.Load import *
-from Code.CP import *
-from Code.Data import *
-from Code.Utils import GaussianLoss, ThresholdAct
+from src.Code.QualityMeasures import *
+from src.Code.Load import *
+from src.Code.CP import *
+from src.Code.Data import *
+from src.Code.Utils import GaussianLoss, ThresholdAct
 
 import torch
 import torch.nn as nn

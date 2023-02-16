@@ -1,10 +1,10 @@
 import copy, sys
 import numpy as np
 
-from Code.CP import *
-from Code.Data import *
-from Code.Load import *
-from Code.QualityMeasures import *
+from src.Code.CP import *
+from src.Code.Data import *
+from src.Code.Load import *
+from src.Code.QualityMeasures import *
 
 import torch
 import torch.nn as nn

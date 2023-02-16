@@ -1,9 +1,10 @@
+# %%
 import sys
 
-from Code.QualityMeasures import *
-from Code.Load import *
-from Code.CP import *
-from Code.Data import *
+from src.Code.QualityMeasures import *
+from src.Code.Load import *
+from src.Code.CP import *
+from src.Code.Data import *
 
 from sklearn.metrics import r2_score
 from sklearn.ensemble import RandomForestRegressor
@@ -36,3 +37,12 @@ def run(data, seed, mode = True, conditional = None, conditional_params = None, 
     container = ForestDataObject(data, "RF", seed = seed, taxonomy_func = tax, **params)
     container = RFCP(container)
     container.export(FOLDER)
+
+# %%
+data = "residential"
+# %%
+SEEDS
+# %%
+for s in SEEDS[:1]:
+    run(data, s)
+# %%

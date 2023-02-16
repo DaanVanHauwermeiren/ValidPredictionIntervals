@@ -1,0 +1,27 @@
+default_language_version:
+    python: python3
+repos:
+  - repo: https://github.com/ambv/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.0.0
+    hooks:
+      - id: flake8
+      - id: detect-private-key
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: debug-statements
+      - id: no-commit-to-branch
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.6.1
+    hooks:
+      - id: nbstripout
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
